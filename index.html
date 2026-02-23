@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Menú Digital - Oberá</title>
+    <!-- Favicon nativo usando SVG (Icono de Hamburguesa/Comida) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍔</text></svg>">
+    
+    <style>
+        /* === VARIABLES DE COLOR Y DISEÑO === */
+        :root {
+            --primary: #FF6B35; /* Naranja cálido */
+            --secondary: #D72638; /* Rojo suave gastronómico */
+            --success: #28A745; /* Verde confirmación */
+            --bg-color: #F8F9FA;
+            --text-dark: #333333;
+            --text-light: #666666;
+            --card-bg: #FFFFFF;
+            --border-radius: 15px;
+            --shadow: 0 4px 10px rgba(0,0,0,0.08);
+            --transition: all 0.3s ease;
+        }
+
+        /* === RESET Y ESTILOS BASE === */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent; 
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            padding-bottom: 90px;
+        }
+
+        /* === HEADER Y BUSCADOR === */
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 25px 20px 30px 20px;
+            text-align: center;
+            color: white;
+            border-bottom-left-radius: 25px;
+            border-bottom-right-radius: 25px;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            font-weight: 800;
+        }
+
+        .search-container {
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .search-container input {
+            width: 100%;
+            padding: 16px 20px;
+            border-radius: 30px;
+            border: none;
+            font-size: 1.1rem;
+            outline: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: var(--transition);
+        }
+
+        .search-container input:focus {
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        /* === CONTENEDOR PRINCIPAL === */
+        main {
+            max-width: 800px;
+            margin: 25px auto;
+            padding: 0 15px;
+        }
+
+        /* === CATEGORÍAS (ACORDEÓN) === */
+        .category-group {
+            margin-bottom: 20px;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .category-header {
+            background: white;
+            padding: 22px 20px;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--secondary);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f0f0f0;
+            transition: var(--transition);
+        }
+
+        .category-header:hover {
+            background: #fffafa;
+        }
+
+        .category-header .icon {
+            transition: transform 0.3s ease;
+            color: var(--primary);
+        }
+
+        .category-group.collapsed .category-header .icon {
+            transform: rotate(-90deg);
+        }
+
+        .category-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            transition: max-height 0.4s ease, opacity 0.4s ease, padding 0.4s ease;
+            max-height: 5000px; 
+            opacity: 1;
+            overflow: hidden;
+        }
+
+        .category-group.collapsed .category-content {
+            max-height: 0;
+            opacity: 0;
+            padding: 0 20px;
+        }
+
+        /* === TARJETAS DE PRODUCTO === */
+        .product-card {
+            background: white;
+            border-radius: var(--border-radius);
+            border: 1px solid #eee;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .product-card:hover {
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            transform: translateY(-3px);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background-color: #f8f8f8;
+        }
+
+        .product-info {
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .product-title {
+            font-size: 1.2rem;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+            line-height: 1.3;
+            font-weight: 700;
+        }
+
+        .product-price {
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: var(--primary);
+            margin-top: auto;
+            margin-bottom: 15px;
+        }
+
+        .btn-add {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-add:hover {
+            background-color: #e85d2b;
+        }
+
+        .btn-add.success {
+            background-color: var(--success);
+            transform: scale(1.02);
+        }
+
+        /* Estado Sin Stock */
+        .product-card.out-of-stock {
+            opacity: 0.55;
+            filter: grayscale(90%);
+        }
+
+        .product-card.out-of-stock .btn-add {
+            background-color: #ccc;
+            cursor: not-allowed;
+            color: #666;
+        }
+
+        /* Etiquetas de Stock */
+        .badge-stock {
+            font-size: 0.85rem;
+            padding: 5px 12px;
+            border-radius: 12px;
+            display: inline-block;
+            margin-bottom: 12px;
+            font-weight: bold;
+            width: fit-content;
+        }
+
+        .badge-available {
+            background-color: #e6f4ea;
+            color: #1e7e34;
+        }
+
+        .badge-out {
+            background-color: #fdeaea;
+            color: var(--secondary);
+        }
+
+        /* === CARRITO FLOTANTE === */
+        .cart-toggle {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background: var(--success);
+            color: white;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            cursor: pointer;
+            z-index: 1000;
+            transition: transform 0.2s, background 0.3s;
+        }
+
+        .cart-toggle:active {
+            transform: scale(0.9);
+        }
+
+        .cart-toggle.pulse {
+            animation: pulse-animation 0.5s;
+        }
+
+        @keyframes pulse-animation {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: var(--secondary);
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* === PANEL LATERAL DEL CARRITO === */
+        .cart-sidebar {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 100%;
+            max-width: 450px;
+            height: 100%;
+            height: 100dvh; 
+            background: white;
+            box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+            z-index: 2000;
+            transition: right 0.3s ease-in-out;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cart-sidebar.open {
+            right: 0;
+        }
+
+        .cart-header {
+            padding: 20px;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .cart-header h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        .close-cart {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .cart-items {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: #fafafa;
+        }
+
+        .cart-item {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border: 1px solid #f0f0f0;
+        }
+
+        .cart-item-info h4 {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            color: var(--text-dark);
+        }
+
+        .cart-item-info p {
+            color: var(--primary);
+            font-weight: 800;
+            font-size: 1.1rem;
+        }
+
+        .cart-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-qty {
+            background: #f0f0f0;
+            border: none;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            color: var(--text-dark);
+            transition: background 0.2s;
+        }
+
+        .btn-qty:active {
+            background: #dcdcdc;
+            transform: scale(0.95);
+        }
+
+        .cart-controls span {
+            font-size: 1.2rem;
+            font-weight: bold;
+            width: 20px;
+            text-align: center;
+        }
+
+        .btn-remove {
+            color: var(--secondary);
+            background: #fdeaea;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            margin-left: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* === FOOTER DEL CARRITO === */
+        .cart-footer {
+            padding: 20px;
+            padding-bottom: calc(20px + env(safe-area-inset-bottom));
+            background: #ffffff;
+            border-top: 1px solid #eee;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
+            flex-shrink: 0; 
+            z-index: 10;
+        }
+
+        .cart-total {
+            font-size: 1.5rem;
+            font-weight: 900;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            color: var(--text-dark);
+        }
+
+        .btn-checkout {
+            width: 100%;
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 18px; 
+            border-radius: 30px;
+            font-size: 1.3rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.3s, transform 0.2s;
+            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-checkout:active {
+            transform: scale(0.98);
+            background: #218838;
+        }
+
+        /* === FONDO OSCURO DEL CARRITO === */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.6);
+            z-index: 1500;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .overlay.show {
+            display: block;
+            opacity: 1;
+        }
+
+        .loader {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--text-light);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- CABECERA Y BUSCADOR -->
+    <header>
+        <h1>🍴 Menú Digital</h1>
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="¿Qué se te antoja hoy? (Ej: pizzas, panchos)">
+        </div>
+    </header>
+
+    <!-- CONTENEDOR DE PRODUCTOS -->
+    <main id="menu-container">
+        <div class="loader" id="loader">Cargando delicias... ⏳</div>
+    </main>
+
+    <!-- BOTÓN FLOTANTE DEL CARRITO -->
+    <div class="cart-toggle" id="cartToggle" onclick="toggleCart()">
+        🛒
+        <div class="cart-badge" id="cartBadge">0</div>
+    </div>
+
+    <!-- OVERLAY DEL CARRITO -->
+    <div class="overlay" id="cartOverlay" onclick="toggleCart()"></div>
+
+    <!-- PANEL LATERAL DEL CARRITO -->
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h2>Mi Pedido</h2>
+            <button class="close-cart" onclick="toggleCart()">✖</button>
+        </div>
+        
+        <div class="cart-items" id="cartItems">
+            <p style="text-align: center; color: #999; margin-top: 20px; font-size: 1.1rem;">Tu carrito está vacío</p>
+        </div>
+
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Total:</span>
+                <span id="cartTotalText">$0</span>
+            </div>
+            <button class="btn-checkout" onclick="enviarPedido()">
+                📲 Hacer Pedido
+            </button>
+        </div>
+    </div>
+
+    <!-- === LÓGICA JAVASCRIPT === -->
+    <script>
+        // CONFIGURACIÓN
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQPuUz3WvZBrXh8j75zt4cVK42PcFC22zfaeoZbk78OFKvftFz2j-J9y7CEHLwL5_oW6fK1jSngPzHJ/pub?gid=0&single=true&output=csv';
+        const WHATSAPP_NUMBER = '5493755603694';
+
+        // ESTADO GLOBAL
+        let menuData = [];
+        let cart = {};
+
+        // INICIALIZACIÓN
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchData();
+            
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                renderMenu(e.target.value.toLowerCase());
+            });
+        });
+
+        // 1. OBTENER Y PROCESAR DATOS (CSV)
+        async function fetchData() {
+            try {
+                const response = await fetch(CSV_URL + '&t=' + new Date().getTime());
+                const csvText = await response.text();
+                menuData = parseCSV(csvText);
+                renderMenu(); 
+            } catch (error) {
+                console.error("Error cargando el menú:", error);
+                document.getElementById('loader').innerText = "Hubo un error al cargar el menú. Por favor, revisa tu conexión.";
+            }
+        }
+
+        // Parseador robusto
+        function parseCSV(text) {
+            const lines = text.split(/\r?\n/);
+            const result = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i];
+                if (!line.trim()) continue;
+
+                let row = [];
+                let inQuotes = false;
+                let current = "";
+                for (let char of line) {
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        row.push(current);
+                        current = "";
+                    } else {
+                        current += char;
+                    }
+                }
+                row.push(current);
+
+                if (row.length < 2) continue; 
+
+                let rawPrice = row[2] || '0';
+                let priceStr = rawPrice.replace(/[^0-9]/g, ''); 
+                let precio = parseInt(priceStr);
+                if (isNaN(precio)) precio = 0;
+
+                let rawStock = row[4] || '0';
+                let stockVal = parseInt(rawStock.replace(/[^0-9]/g, ''));
+                if (isNaN(stockVal)) stockVal = 0;
+                let disponible = stockVal > 0;
+
+                let categoria = (row[0] || 'OTROS').trim().toUpperCase();
+                let descripcion = (row[1] || 'Sin descripción').trim();
+
+                result.push({
+                    id: `prod_${i}`,
+                    categoria: categoria,
+                    descripcion: descripcion,
+                    precio: precio,
+                    // Nueva función mixta de procesamiento de imágenes enviando cat y desc
+                    imagen: procesarImagen(row[3] ? row[3].trim() : '', categoria, descripcion),
+                    disponible: disponible
+                });
+            }
+            return result;
+        }
+
+        function formatPrice(num) {
+            return '$' + num.toLocaleString('es-AR');
+        }
+
+        // ==========================================
+        // SISTEMA MIXTO E INTELIGENTE DE IMÁGENES
+        // ==========================================
+        function procesarImagen(url, categoria, descripcion) {
+            
+            // 1. Detección implacable de Google Drive (Modo Force)
+            if (url.includes('drive.google.com')) {
+                // Regex poderoso que captura el ID sin importar el formato del link de Drive
+                const regex = /(?:id=|file\/d\/|d\/)([a-zA-Z0-9_-]{15,})/;
+                const match = url.match(regex);
+                if (match && match[1]) {
+                    return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+                }
+            }
+            
+            // 2. Si es un link web tradicional y directo (Empieza con http/https)
+            if (url.startsWith('http')) {
+                return url;
+            }
+
+            // 3. Sistema de Carpetas Locales Automático (GitHub / Netlify / Hosting)
+            const carpetaPrincipal = 'Imágenes';
+            const subCarpeta = categoria.toUpperCase();
+            
+            let archivo = '';
+            if (url !== '') {
+                // Si en el Excel escribiste "mi_foto.jpg"
+                archivo = url.toLowerCase();
+                // Si olvidaste ponerle la extensión en el excel, le asignamos .png por defecto
+                if (!archivo.includes('.')) {
+                    archivo += '.png';
+                }
+            } else {
+                // Si la celda está completamente vacía, usa la descripción
+                // Ej: Descripción "Muzzarella" -> "muzzarella.png"
+                archivo = descripcion.toLowerCase() + '.png';
+            }
+
+            // Unimos todo y usamos encodeURI para que espacios en descripciones (ej "con jamon.png")
+            // sean válidos en internet (%20)
+            const rutaLocal = `${carpetaPrincipal}/${subCarpeta}/${archivo}`;
+            return encodeURI(rutaLocal);
+        }
+
+        function obtenerIconoCategoria(categoria) {
+            const c = categoria.toLowerCase();
+            if (c.includes('pizza')) return '🍕';
+            if (c.includes('hamburguesa') || c.includes('hamburgueza') || c.includes('burger')) return '🍔';
+            if (c.includes('pancho') || c.includes('hot dog') || c.includes('hotdog')) return '🌭';
+            if (c.includes('empanada')) return '🥟';
+            if (c.includes('bebida') || c.includes('gaseosa') || c.includes('agua') || c.includes('jugo') || c.includes('coca')) return '🥤';
+            if (c.includes('cerveza') || c.includes('alcohol')) return '🍺';
+            if (c.includes('postre') || c.includes('dulce') || c.includes('helado')) return '🍨';
+            if (c.includes('ensalada')) return '🥗';
+            if (c.includes('pollo')) return '🍗';
+            if (c.includes('carne') || c.includes('parrilla') || c.includes('asado')) return '🥩';
+            if (c.includes('papas') || c.includes('frita')) return '🍟';
+            if (c.includes('sándwich') || c.includes('sandwich') || c.includes('lomito')) return '🥪';
+            if (c.includes('taco')) return '🌮';
+            if (c.includes('pasta') || c.includes('fideo')) return '🍝';
+            if (c.includes('pescado') || c.includes('marisco')) return '🍤';
+            if (c.includes('café') || c.includes('cafe') || c.includes('desayuno')) return '☕';
+            return '🍽️';
+        }
+
+        function formatoTitulo(texto) {
+            if (!texto) return '';
+            return texto.charAt(0).toUpperCase() + texto.slice(1).toLowerCase();
+        }
+
+        // 2. RENDERIZADO DEL MENÚ EN PANTALLA
+        function renderMenu(filtro = '') {
+            const container = document.getElementById('menu-container');
+            container.innerHTML = ''; 
+
+            const productosFiltrados = menuData.filter(p => {
+                const textoBusqueda = `${p.categoria} ${p.descripcion}`.toLowerCase();
+                return textoBusqueda.includes(filtro);
+            });
+
+            if (productosFiltrados.length === 0) {
+                container.innerHTML = '<div class="loader">No se encontraron productos 😢</div>';
+                return;
+            }
+
+            const categorias = {};
+            productosFiltrados.forEach(p => {
+                if (!categorias[p.categoria]) categorias[p.categoria] = [];
+                categorias[p.categoria].push(p);
+            });
+
+            for (const [catName, productos] of Object.entries(categorias)) {
+                const catGroup = document.createElement('div');
+                
+                if (filtro === '') {
+                    catGroup.className = 'category-group collapsed';
+                } else {
+                    catGroup.className = 'category-group';
+                }
+                
+                const header = document.createElement('div');
+                header.className = 'category-header';
+                header.innerHTML = `
+                    <span>${obtenerIconoCategoria(catName)} ${formatoTitulo(catName)}</span>
+                    <span class="icon">▼</span>
+                `;
+                header.onclick = () => catGroup.classList.toggle('collapsed');
+                catGroup.appendChild(header);
+
+                const content = document.createElement('div');
+                content.className = 'category-content';
+
+                productos.forEach(prod => {
+                    const hasStock = prod.disponible;
+                    const card = document.createElement('div');
+                    card.className = `product-card ${!hasStock ? 'out-of-stock' : ''}`;
+                    
+                    const btnHtml = hasStock 
+                        ? `<button class="btn-add" onclick="agregarAlCarrito('${prod.id}', this)">➕ Agregar al carrito</button>`
+                        : `<button class="btn-add" disabled>❌ Sin Stock</button>`;
+
+                    const badgeHtml = hasStock 
+                        ? `<span class="badge-stock badge-available">✔️ Disponible</span>` 
+                        : `<span class="badge-stock badge-out">❌ Sin Stock</span>`;
+
+                    // Si la imagen local falla (porque no subiste la foto), pone un placeholder por defecto
+                    card.innerHTML = `
+                        <img src="${prod.imagen}" alt="${prod.descripcion}" class="product-image" loading="lazy" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x300?text=Sin+Imagen'">
+                        <div class="product-info">
+                            ${badgeHtml}
+                            <h3 class="product-title">${prod.descripcion}</h3>
+                            <span class="product-price">${formatPrice(prod.precio)}</span>
+                            ${btnHtml}
+                        </div>
+                    `;
+                    content.appendChild(card);
+                });
+
+                catGroup.appendChild(content);
+                container.appendChild(catGroup);
+            }
+        }
+
+        // 3. FUNCIONES DEL CARRITO
+        function agregarAlCarrito(id, btnElement) {
+            const producto = menuData.find(p => p.id === id);
+            if (!producto || !producto.disponible) return;
+
+            const originalText = btnElement.innerHTML;
+            btnElement.innerHTML = "¡Agregado! ✔️";
+            btnElement.classList.add("success");
+            
+            const cartBtn = document.getElementById('cartToggle');
+            cartBtn.classList.remove('pulse');
+            void cartBtn.offsetWidth; 
+            cartBtn.classList.add('pulse');
+
+            setTimeout(() => {
+                btnElement.innerHTML = originalText;
+                btnElement.classList.remove("success");
+            }, 1000);
+
+            if (cart[id]) {
+                cart[id].cantidad++;
+            } else {
+                cart[id] = { ...producto, cantidad: 1 };
+            }
+            actualizarCarritoUI();
+        }
+
+        function modificarCantidad(id, delta) {
+            if (cart[id]) {
+                cart[id].cantidad += delta;
+                if (cart[id].cantidad <= 0) {
+                    delete cart[id];
+                }
+                actualizarCarritoUI();
+            }
+        }
+
+        function eliminarDelCarrito(id) {
+            delete cart[id];
+            actualizarCarritoUI();
+        }
+
+        function actualizarCarritoUI() {
+            const cartItemsContainer = document.getElementById('cartItems');
+            const cartBadge = document.getElementById('cartBadge');
+            const cartTotalText = document.getElementById('cartTotalText');
+
+            cartItemsContainer.innerHTML = '';
+            let totalGeneral = 0;
+            let cantidadTotal = 0;
+
+            const items = Object.values(cart);
+
+            if (items.length === 0) {
+                cartItemsContainer.innerHTML = '<p style="text-align: center; color: #999; margin-top: 30px; font-size: 1.1rem;">Tu carrito está vacío 🛒</p>';
+            } else {
+                items.forEach(item => {
+                    const subtotal = item.precio * item.cantidad;
+                    totalGeneral += subtotal;
+                    cantidadTotal += item.cantidad;
+
+                    const nombreCompleto = `${formatoTitulo(item.categoria)} ${item.descripcion}`;
+
+                    const div = document.createElement('div');
+                    div.className = 'cart-item';
+                    div.innerHTML = `
+                        <div class="cart-item-info">
+                            <h4>${nombreCompleto}</h4>
+                            <p>${formatPrice(item.precio)}</p>
+                        </div>
+                        <div class="cart-controls">
+                            <button class="btn-qty" onclick="modificarCantidad('${item.id}', -1)">-</button>
+                            <span>${item.cantidad}</span>
+                            <button class="btn-qty" onclick="modificarCantidad('${item.id}', 1)">+</button>
+                            <button class="btn-remove" onclick="eliminarDelCarrito('${item.id}')">🗑️</button>
+                        </div>
+                    `;
+                    cartItemsContainer.appendChild(div);
+                });
+            }
+
+            cartBadge.innerText = cantidadTotal;
+            cartTotalText.innerText = formatPrice(totalGeneral);
+        }
+
+        // 4. CONTROL DE APERTURA/CIERRE DEL CARRITO
+        function toggleCart() {
+            const sidebar = document.getElementById('cartSidebar');
+            const overlay = document.getElementById('cartOverlay');
+            
+            sidebar.classList.toggle('open');
+            if (sidebar.classList.contains('open')) {
+                overlay.classList.add('show');
+            } else {
+                overlay.classList.remove('show');
+            }
+        }
+
+        // 5. ENVÍO DE PEDIDO POR WHATSAPP 
+        function enviarPedido() {
+            const items = Object.values(cart);
+            if (items.length === 0) {
+                alert("Tu carrito está vacío. Agrega productos antes de pedir.");
+                return;
+            }
+
+            let mensaje = "Hola! me gustaría hacer el siguiente pedido 👇\r\n\r\n";
+            let totalGeneral = 0;
+
+            items.forEach(item => {
+                const subtotal = item.precio * item.cantidad;
+                totalGeneral += subtotal;
+                
+                const emoji = obtenerIconoCategoria(item.categoria);
+                const nombreItem = `${formatoTitulo(item.categoria)} ${item.descripcion}`;
+                
+                mensaje += `${emoji} ${item.cantidad}x ${nombreItem} (${formatPrice(subtotal)})\r\n`;
+            });
+
+            mensaje += `\r\n*Total a pagar: ${formatPrice(totalGeneral)}*\r\n\r\n¿Podrían confirmarme la disponibilidad?`;
+
+            const mensajeCodificado = encodeURIComponent(mensaje);
+            const urlWhatsapp = `https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${mensajeCodificado}`;
+            
+            window.open(urlWhatsapp, '_blank');
+        }
+
+    </script>
+</body>
+</html>
