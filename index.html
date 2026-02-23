@@ -543,7 +543,7 @@
 
     <!-- === LÓGICA JAVASCRIPT === -->
     <script>
-        // CONFIGURACIÓN (Actualizada con tu nuevo enlace)
+        // CONFIGURACIÓN 
         const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTSOvNeGjZ-L7VcX2I_E4u-bDw3_S_Cn2Phmq_UsMhYLn7-4w-LGhds3C83sT-STbbuOhXU2ZuwgbSb/pub?gid=0&single=true&output=csv';
         const WHATSAPP_NUMBER = '5493755603694';
 
@@ -617,7 +617,7 @@
                     categoria: categoria,
                     descripcion: descripcion,
                     precio: precio,
-                    // Nueva función mixta de procesamiento de imágenes enviando cat y desc
+                    // Nueva función mixta y blindada para imágenes
                     imagen: procesarImagen(row[3] ? row[3].trim() : '', categoria, descripcion),
                     disponible: disponible
                 });
@@ -633,44 +633,41 @@
         // SISTEMA MIXTO E INTELIGENTE DE IMÁGENES
         // ==========================================
         function procesarImagen(url, categoria, descripcion) {
-            
+            let cleanUrl = url.trim();
+
             // 1. Detección implacable de Google Drive (Modo Force)
-            if (url.includes('drive.google.com')) {
-                // Regex poderoso que captura el ID sin importar el formato del link de Drive
+            if (cleanUrl.includes('drive.google.com')) {
+                // Atrapa el ID oculto sin importar cómo te den el link
                 const regex = /(?:id=|file\/d\/|d\/)([a-zA-Z0-9_-]{15,})/;
-                const match = url.match(regex);
+                const match = cleanUrl.match(regex);
                 if (match && match[1]) {
                     return `https://drive.google.com/uc?export=view&id=${match[1]}`;
                 }
             }
             
-            // 2. Si es un link web tradicional y directo (Empieza con http/https)
-            if (url.startsWith('http')) {
-                return url;
+            // 2. Si es un link web tradicional y directo (http/https)
+            if (cleanUrl.startsWith('http')) {
+                return cleanUrl;
             }
 
-            // 3. Sistema de Carpetas Locales Automático (GitHub / Netlify / Hosting)
-            const carpetaPrincipal = 'Imágenes';
-            const subCarpeta = categoria.toUpperCase();
+            // 3. Sistema de Carpetas Locales Automático en GitHub (Carpeta: images)
+            const carpetaPrincipal = 'images';
+            const subCarpeta = categoria.toUpperCase().trim();
             
             let archivo = '';
-            if (url !== '') {
-                // Si en el Excel escribiste "mi_foto.jpg"
-                archivo = url.toLowerCase();
-                // Si olvidaste ponerle la extensión en el excel, le asignamos .png por defecto
+            if (cleanUrl !== '') {
+                // Si escribiste "foto.jpg" en el excel, respeta ese nombre
+                archivo = cleanUrl;
                 if (!archivo.includes('.')) {
                     archivo += '.png';
                 }
             } else {
-                // Si la celda está completamente vacía, usa la descripción
-                // Ej: Descripción "Muzzarella" -> "muzzarella.png"
-                archivo = descripcion.toLowerCase() + '.png';
+                // Si dejaste la celda vacía, asume que la foto se llama igual que la descripción
+                archivo = descripcion.trim().toLowerCase() + '.png';
             }
 
-            // Unimos todo y usamos encodeURI para que espacios en descripciones (ej "con jamon.png")
-            // sean válidos en internet (%20)
-            const rutaLocal = `${carpetaPrincipal}/${subCarpeta}/${archivo}`;
-            return encodeURI(rutaLocal);
+            // encodeURIComponent asegura que los espacios (ej: "con jamon.png") se codifiquen a "%20" y funcionen en GitHub
+            return `${carpetaPrincipal}/${encodeURIComponent(subCarpeta)}/${encodeURIComponent(archivo)}`;
         }
 
         function obtenerIconoCategoria(categoria) {
@@ -754,7 +751,7 @@
                         ? `<span class="badge-stock badge-available">✔️ Disponible</span>` 
                         : `<span class="badge-stock badge-out">❌ Sin Stock</span>`;
 
-                    // Si la imagen local falla (porque no subiste la foto), pone un placeholder por defecto
+                    // Si la imagen falla (link de drive bloqueado o imagen local borrada), muestra el placeholder genérico
                     card.innerHTML = `
                         <img src="${prod.imagen}" alt="${prod.descripcion}" class="product-image" loading="lazy" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x300?text=Sin+Imagen'">
                         <div class="product-info">
