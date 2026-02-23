@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Menú Digital - Oberá</title>
-    <!-- Favicon nativo usando SVG -->
+    <!-- Favicon nativo usando SVG (Icono de Hamburguesa/Comida) -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍔</text></svg>">
     
     <style>
         /* === VARIABLES DE COLOR Y DISEÑO === */
         :root {
-            --primary: #FF6B35;
-            --secondary: #D72638;
-            --success: #28A745;
+            --primary: #FF6B35; /* Naranja cálido */
+            --secondary: #D72638; /* Rojo suave gastronómico */
+            --success: #28A745; /* Verde confirmación */
             --bg-color: #F8F9FA;
             --text-dark: #333333;
             --text-light: #666666;
@@ -617,8 +617,8 @@
                     categoria: categoria,
                     descripcion: descripcion,
                     precio: precio,
-                    // Función mixta y blindada para imágenes
-                    imagen: procesarImagen(row[3] ? row[3].trim() : '', categoria, descripcion),
+                    // Motor blindado de imágenes
+                    imagen: procesarImagen(row[3] ? row[3].trim() : '', categoria),
                     disponible: disponible
                 });
             }
@@ -630,45 +630,43 @@
         }
 
         // ==========================================
-        // SISTEMA MIXTO E INTELIGENTE DE IMÁGENES
+        // SISTEMA MIXTO Y DEFINITIVO DE IMÁGENES
         // ==========================================
-        function procesarImagen(url, categoria, descripcion) {
+        function procesarImagen(url, categoria) {
             let cleanUrl = url.trim();
 
-            // 1. Detección implacable de Google Drive (Modo Force)
+            // 1. Google Drive (Modo Extractor de ID al formato thumbnail?id=)
             if (cleanUrl.includes('drive.google.com')) {
-                // Atrapa el ID oculto sin importar cómo te den el link
+                // Esta fórmula detecta el ID sin importar si te compartieron el link como /file/d/, id=, etc.
                 const regex = /(?:id=|file\/d\/|d\/)([a-zA-Z0-9_-]{15,})/;
                 const match = cleanUrl.match(regex);
                 if (match && match[1]) {
-                    return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+                    // Forzamos la visualización miniatura de Google (evita bloqueos)
+                    return `https://drive.google.com/thumbnail?id=${match[1]}`;
                 }
             }
             
-            // 2. Si es un link web tradicional y directo (http/https o data:)
+            // 2. Links Directos de Internet (Webs, Imgur, etc)
             if (cleanUrl.startsWith('http') || cleanUrl.startsWith('data:')) {
                 return cleanUrl;
             }
 
-            // 3. Sistema de Carpetas Locales Automático en GitHub (Carpeta: images)
-            const carpetaPrincipal = 'images'; // Obligatorio que en tu PC/GitHub sea "images" en minúscula
-            const subCarpeta = categoria.trim(); // Ej: "PIZZAS" (Respeta mayúsculas si en Excel está así)
+            // 3. Sistema Local Github (Carpeta "images")
+            const carpetaPrincipal = 'images';
+            const subCarpeta = categoria.trim(); // Ej: "HAMBURGUESAS"
             
-            let archivo = '';
-            if (cleanUrl !== '') {
-                // Si escribiste el nombre manual en el excel (ej: foto1.jpg)
-                archivo = cleanUrl;
-                if (!archivo.includes('.')) {
-                    archivo += '.png';
-                }
-            } else {
-                // Si la celda está vacía, intenta usar la descripción con .png
-                // NOTA: Esto solo funcionará si en tu carpeta el archivo se llama EXACTAMENTE igual
-                archivo = descripcion.trim().toLowerCase() + '.png';
+            // Si dejaste la celda vacía en Excel, devuelve la imagen de "Sin Imagen" directamente
+            // para evitar buscar cosas raras. Tienes que escribir el nombre del archivo en el excel sí o sí.
+            if (cleanUrl === '') {
+                return 'https://via.placeholder.com/400x300?text=Sin+Imagen';
             }
 
-            // encodeURI codifica la ruta completa correctamente (convierte espacios en %20 para internet)
-            return encodeURI(`${carpetaPrincipal}/${subCarpeta}/${archivo}`);
+            let archivo = cleanUrl; 
+            // Ya NO forzamos minúsculas ni extensiones fantasmas. 
+            // Lo que escribas en Excel (Ej: "doble-carne.jpg" o "foto.webp") será lo que se busque.
+            
+            // encodeURIComponent se asegura de que si tu foto tiene espacios, funcione igual
+            return `${carpetaPrincipal}/${encodeURIComponent(subCarpeta)}/${encodeURIComponent(archivo)}`;
         }
 
         function obtenerIconoCategoria(categoria) {
@@ -752,10 +750,10 @@
                         ? `<span class="badge-stock badge-available">✔️ Disponible</span>` 
                         : `<span class="badge-stock badge-out">❌ Sin Stock</span>`;
 
-                    // AQUÍ ESTÁ EL DIAGNOSTICADOR: Si falla, te avisará por la consola la ruta que falló
+                    // Si la foto no carga (ej: pusiste mal una mayúscula), te avisará en la consola y mostrará el Error gris.
                     card.innerHTML = `
                         <img src="${prod.imagen}" alt="${prod.descripcion}" class="product-image" loading="lazy" 
-                        onerror="console.error('Error cargando imagen: ${prod.imagen}'); this.onerror=null; this.src='https://via.placeholder.com/400x300?text=Error+de+Ruta+o+Nombre';">
+                        onerror="console.error('La imagen no existe o está mal escrita: ${prod.imagen}'); this.onerror=null; this.src='https://via.placeholder.com/400x300?text=Error+en+Foto';">
                         <div class="product-info">
                             ${badgeHtml}
                             <h3 class="product-title">${prod.descripcion}</h3>
