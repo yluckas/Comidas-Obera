@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Menú Digital - Oberá</title>
-    <!-- Favicon nativo usando SVG (Icono de Hamburguesa/Comida) -->
+    <!-- Favicon nativo usando SVG -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍔</text></svg>">
     
     <style>
         /* === VARIABLES DE COLOR Y DISEÑO === */
         :root {
-            --primary: #FF6B35; /* Naranja cálido */
-            --secondary: #D72638; /* Rojo suave gastronómico */
-            --success: #28A745; /* Verde confirmación */
+            --primary: #FF6B35;
+            --secondary: #D72638;
+            --success: #28A745;
             --bg-color: #F8F9FA;
             --text-dark: #333333;
             --text-light: #666666;
@@ -617,7 +617,7 @@
                     categoria: categoria,
                     descripcion: descripcion,
                     precio: precio,
-                    // Nueva función mixta y blindada para imágenes
+                    // Función mixta y blindada para imágenes
                     imagen: procesarImagen(row[3] ? row[3].trim() : '', categoria, descripcion),
                     disponible: disponible
                 });
@@ -645,29 +645,30 @@
                 }
             }
             
-            // 2. Si es un link web tradicional y directo (http/https)
-            if (cleanUrl.startsWith('http')) {
+            // 2. Si es un link web tradicional y directo (http/https o data:)
+            if (cleanUrl.startsWith('http') || cleanUrl.startsWith('data:')) {
                 return cleanUrl;
             }
 
             // 3. Sistema de Carpetas Locales Automático en GitHub (Carpeta: images)
-            const carpetaPrincipal = 'images';
-            const subCarpeta = categoria.toUpperCase().trim();
+            const carpetaPrincipal = 'images'; // Obligatorio que en tu PC/GitHub sea "images" en minúscula
+            const subCarpeta = categoria.trim(); // Ej: "PIZZAS" (Respeta mayúsculas si en Excel está así)
             
             let archivo = '';
             if (cleanUrl !== '') {
-                // Si escribiste "foto.jpg" en el excel, respeta ese nombre
+                // Si escribiste el nombre manual en el excel (ej: foto1.jpg)
                 archivo = cleanUrl;
                 if (!archivo.includes('.')) {
                     archivo += '.png';
                 }
             } else {
-                // Si dejaste la celda vacía, asume que la foto se llama igual que la descripción
+                // Si la celda está vacía, intenta usar la descripción con .png
+                // NOTA: Esto solo funcionará si en tu carpeta el archivo se llama EXACTAMENTE igual
                 archivo = descripcion.trim().toLowerCase() + '.png';
             }
 
-            // encodeURIComponent asegura que los espacios (ej: "con jamon.png") se codifiquen a "%20" y funcionen en GitHub
-            return `${carpetaPrincipal}/${encodeURIComponent(subCarpeta)}/${encodeURIComponent(archivo)}`;
+            // encodeURI codifica la ruta completa correctamente (convierte espacios en %20 para internet)
+            return encodeURI(`${carpetaPrincipal}/${subCarpeta}/${archivo}`);
         }
 
         function obtenerIconoCategoria(categoria) {
@@ -751,9 +752,10 @@
                         ? `<span class="badge-stock badge-available">✔️ Disponible</span>` 
                         : `<span class="badge-stock badge-out">❌ Sin Stock</span>`;
 
-                    // Si la imagen falla (link de drive bloqueado o imagen local borrada), muestra el placeholder genérico
+                    // AQUÍ ESTÁ EL DIAGNOSTICADOR: Si falla, te avisará por la consola la ruta que falló
                     card.innerHTML = `
-                        <img src="${prod.imagen}" alt="${prod.descripcion}" class="product-image" loading="lazy" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x300?text=Sin+Imagen'">
+                        <img src="${prod.imagen}" alt="${prod.descripcion}" class="product-image" loading="lazy" 
+                        onerror="console.error('Error cargando imagen: ${prod.imagen}'); this.onerror=null; this.src='https://via.placeholder.com/400x300?text=Error+de+Ruta+o+Nombre';">
                         <div class="product-info">
                             ${badgeHtml}
                             <h3 class="product-title">${prod.descripcion}</h3>
